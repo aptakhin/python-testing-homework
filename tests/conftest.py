@@ -6,9 +6,20 @@ It may be also used for extending doctest's context:
 2. https://docs.pytest.org/en/latest/doctest.html
 """
 
-pytest_plugins = [
-    # Should be the first custom one:
-    'plugins.django_settings',
+import pytest
 
-    # TODO: add your own plugins here!
+from server.apps.pictures.container import container
+from server.common.django.types import Settings
+
+pytest_plugins = [
+    'plugins.django_settings',
+    'plugins.mimesis_fake',
+    'plugins.identity.identity',
+    'plugins.pictures.pictures',
 ]
+
+
+@pytest.fixture()
+def settings() -> Settings:
+    """Get Django settings."""
+    return container.resolve(Settings)
