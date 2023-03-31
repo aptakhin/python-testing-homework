@@ -44,6 +44,7 @@ def mock_lead_patch_user_api(
     return factory
 
 
+@pytest.mark.timeout(3)
 @pytest.mark.django_db()
 def test_user_succesful_update(  # noqa: WPS211
     client: Client,
