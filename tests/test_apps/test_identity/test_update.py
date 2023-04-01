@@ -2,6 +2,8 @@ from contextlib import contextmanager
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Callable, Iterator
 
+from django.http import HttpResponse
+
 try:
     # Requires Python 3.10
     from typing import TypeAlias  # noqa: WPS433 # type: ignore[attr-defined]
@@ -44,6 +46,7 @@ def mock_lead_patch_user_api(
     return factory
 
 
+@pytest.mark.timeout(3)
 @pytest.mark.django_db()
 def test_user_succesful_update(  # noqa: WPS211
     client: Client,
@@ -59,13 +62,13 @@ def test_user_succesful_update(  # noqa: WPS211
         email=signedin_user.email,
     )
     with mock_lead_patch_user_api():
-        response = client.post(
+        response: HttpResponse = client.post(
             reverse('identity:user_update'),
             data=update_user_data,
         )
 
     assert response.status_code == HTTPStatus.FOUND
-    assert response.url == reverse('identity:user_update')  # type: ignore[attr-defined]
+    assert response.url == reverse('identity:user_update')
     assert_correct_user(
         signedin_user.email,
         expected_user_data(update_user_data),

@@ -1,4 +1,5 @@
 from typing import Iterator
+
 import pytest
 from mimesis.schema import Field
 

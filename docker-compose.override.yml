@@ -25,6 +25,14 @@ services:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
 
+  json_server:
+    build:
+      context: json_server
+    volumes:
+      - .:/app
+    ports:
+      - "3000:80"
+
 networks:
   # Fake API network:
   bitrixnet:

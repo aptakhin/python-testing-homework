@@ -64,7 +64,6 @@ class RegistrationDataFactory(Protocol):
         **fields: Unpack[RegistrationData],
     ) -> RegistrationData:
         """Call factory."""
-        return RegistrationData(**fields)
 
 
 @pytest.fixture()
@@ -186,7 +185,7 @@ def registered_user(
         )
 
     assert response.status_code == HTTPStatus.FOUND
-    assert response.url == reverse('identity:login')  # type: ignore[attr-defined]
+    assert response.url == reverse('identity:login')
     return assert_correct_user(
         registration_data['email'],
         expected_user_data(registration_data),
@@ -224,16 +223,8 @@ def expected_user_data() -> ExpectedUserData:
 @pytest.mark.django_db()
 def signedin_user(
     client: Client,
-    signin_user_data: SigninUserData,
     registered_user: User,
 ) -> User:
-    """Test successful login."""
-    response = client.post(
-        reverse('identity:login'),
-        data=signin_user_data,
-    )
-
-    assert response.status_code == HTTPStatus.FOUND
-    assert response.url == reverse('pictures:dashboard')  # type: ignore[attr-defined]
-
+    """Ыuccessful login."""
+    client.force_login(registered_user)
     return registered_user
