@@ -1,5 +1,6 @@
 from http import HTTPStatus
 from typing import TYPE_CHECKING
+from django.http import HttpResponse
 
 import pytest
 from django.test import Client
@@ -8,6 +9,7 @@ from django.urls import reverse
 if TYPE_CHECKING:
     from tests.plugins.identity.pytest_identity import (
         ExpectedUserData,
+        MockLeadFetchAPI,
         RegistrationData,
         RegistrationDataFactory,
         UserAssertion,
@@ -15,6 +17,30 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.django_db()
+def test_valid_registration_mock(
+    client: Client,
+    registration_data: 'RegistrationData',
+    expected_user_data: 'ExpectedUserData',
+    assert_correct_user: 'UserAssertion',
+    mock_lead_post_user_api: 'MockLeadFetchAPI',
+) -> None:
+    """Test that registration works with correct user data."""
+    with mock_lead_post_user_api():
+        response: HttpResponse = client.post(
+            reverse('identity:registration'),
+            data=registration_data,
+        )
+
+    assert response.status_code == HTTPStatus.FOUND
+    assert response.url == reverse('identity:login')  # type: ignore[attr-defined]
+    assert_correct_user(
+        registration_data['email'],
+        expected_user_data(registration_data),
+    )
+
+
+@pytest.mark.django_db()
+@pytest.mark.timeout(3)
 def test_valid_registration(
     client: Client,
     registration_data: 'RegistrationData',
@@ -22,7 +48,7 @@ def test_valid_registration(
     assert_correct_user: 'UserAssertion',
 ) -> None:
     """Test that registration works with correct user data."""
-    response = client.post(
+    response: HttpResponse = client.post(
         reverse('identity:registration'),
         data=registration_data,
     )
@@ -43,7 +69,7 @@ def test_invalid_registration_no_email(
     """Test invalid registration with no email."""
     user_data = registration_data_factory()
     user_data.pop('email')
-    response = client.post(
+    response: HttpResponse = client.post(
         reverse('identity:registration'),
         data=user_data,
     )
@@ -57,7 +83,7 @@ def test_invalid_registration_invalid_email(
     registration_data_factory: 'RegistrationDataFactory',
 ) -> None:
     """Test invalid registration with invalid email."""
-    response = client.post(
+    response: HttpResponse = client.post(
         reverse('identity:registration'),
         data=registration_data_factory(email='invalid'),
     )

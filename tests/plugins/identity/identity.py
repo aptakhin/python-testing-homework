@@ -64,7 +64,6 @@ class RegistrationDataFactory(Protocol):
         **fields: Unpack[RegistrationData],
     ) -> RegistrationData:
         """Call factory."""
-        return RegistrationData(**fields)
 
 
 @pytest.fixture()
@@ -186,7 +185,7 @@ def registered_user(
         )
 
     assert response.status_code == HTTPStatus.FOUND
-    assert response.url == reverse('identity:login')  # type: ignore[attr-defined]
+    assert response.url == reverse('identity:login')
     return assert_correct_user(
         registration_data['email'],
         expected_user_data(registration_data),
